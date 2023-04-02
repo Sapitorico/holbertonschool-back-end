@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-"""Python script that, using this REST API,
-for a given employee ID, returns information about his/her TODO list progress"""
+"""
+Python script that, using this REST API,
+for a given employee ID, returns information about his/her TODO list progress
+"""
 
 import requests
 import sys
@@ -21,4 +23,4 @@ if __name__ == "__main__":
     ))
 
     for task in tasks:
-        print('\t {}'.format(task.get('title')))
+        print('\t{}'.format(task.get('title')))
