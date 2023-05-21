@@ -1,36 +1,36 @@
 #!/usr/bin/python3
 """
-Python script that, using this REST API, for a given employee ID, 
-returns information about his/her TODO list progress
+made by mateo bonino
 """
-
 import requests
 import sys
 
+if __name__ == '__main__':
+    user_id = sys.argv[1]
+    url = "https://jsonplaceholder.typicode.com/todos"
+    get_name = "https://jsonplaceholder.typicode.com/users"
+    response = requests.get(
+        url,
+        params={'userId': int(user_id)})
+    user_response = requests.get(
+        get_name,
+        params={'id': int(user_id)})
+    count = 0
+    total_tasks = 0
+    tasks_text = []
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: ./todo.py <employee_id>")
-        sys.exit(1)
+    for key in response.json():
+        if key['completed'] is True:
+            count += 1
+            tasks_text.append(key['title'])
+        total_tasks += 1
+    employee_name = ''
+    for name in user_response.json():
+        if 'name' in name.keys():
+            employee_name = name['name']
 
-    employee_id = sys.argv[1]
-
-    user_info_url = "https://jsonplaceholder.typicode.com/users/{}".format(employee_id)
-    user_info_response = requests.get(user_info_url)
-    user_info = user_info_response.json()
-
-    todos_url = "https://jsonplaceholder.typicode.com/todos?userId={}".format(employee_id)
-    todos_response = requests.get(todos_url)
-    todos = todos_response.json()
-
-    num_completed_todos = 0
-    for todo in todos:
-        if todo['completed']:
-            num_completed_todos += 1
-    num_total_todos = len(todos)
-
-    print("Employee {} is done with tasks({}/{}):".format(user_info['name'], num_completed_todos, num_total_todos))
-
-    for todo in todos:
-        if todo['completed']:
-            print("\t {}".format(todo['title']))
+    print("Employee {} is done with tasks({}/{}):".format(employee_name,
+                                                          count,
+                                                          total_tasks))
+    for task in tasks_text:
+        print("\t {}".format(task))
