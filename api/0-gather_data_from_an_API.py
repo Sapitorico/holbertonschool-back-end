@@ -1,34 +1,37 @@
 #!/usr/bin/python3
-"""sqws"""
 import requests
 import sys
 
 if __name__ == '__main__':
-    user_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/todos"
-    get_name = "https://jsonplaceholder.typicode.com/users"
-    response = requests.get(
-        url,
-        params={'userId': int(user_id)})
-    user_response = requests.get(
-        get_name,
-        params={'id': int(user_id)})
-    count = 0
-    total_tasks = 0
-    tasks_text = []
+    employee_id = sys.argv[1]
+    todos_url = "https://jsonplaceholder.typicode.com/todos"
+    users_url = "https://jsonplaceholder.typicode.com/users"
 
-    for key in response.json():
-        if key['completed'] is True:
-            count += 1
-            tasks_text.append(key['title'])
-        total_tasks += 1
-    employee_name = ''
-    for name in user_response.json():
-        if 'name' in name.keys():
-            employee_name = name['name']
+    todos_response = requests.get(todos_url, params={'userId': int(employee_id)})
+    user_response = requests.get(users_url, params={'id': int(employee_id)})
 
-    print("Employee {} is done with tasks({}/{}):".format(employee_name,
-                                                          count,
-                                                          total_tasks))
-    for task in tasks_text:
-        print("\t {}".format(task))
+    if todos_response.status_code != 200 or user_response.status_code != 200:
+        print("Error: Failed to fetch data from the API.")
+        sys.exit(1)
+
+    todos = todos_response.json()
+    user = user_response.json()
+
+    if not user:
+        print("Error: Employee with ID {} not found.".format(employee_id))
+        sys.exit(1)
+
+    employee_name = user[0].get('name')
+    completed_tasks = []
+    total_tasks = len(todos)
+
+    for todo in todos:
+        if todo.get('completed'):
+            completed_tasks.append(todo.get('title'))
+
+    num_completed_tasks = len(completed_tasks)
+
+    print("Employee {} is done with tasks({}/{}):".format(employee_name, num_completed_tasks, total_tasks))
+    for task in completed_tasks:
+        print("\t{}".format(task))
+
