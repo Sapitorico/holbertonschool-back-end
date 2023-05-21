@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-"""
-made by mateo bonino
-"""
+"""sqws"""
 import requests
 import sys
 
