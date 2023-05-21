@@ -1,38 +1,40 @@
 #!/usr/bin/python3
-"""ss"""
-import requests
+"""
+s
+"""
+import json
 import sys
+import urllib.request
 
 if __name__ == '__main__':
-    employee_id = sys.argv[1]
-    todos_url = "https://jsonplaceholder.typicode.com/todos"
-    users_url = "https://jsonplaceholder.typicode.com/users"
+    USER = sys.argv[1]
+    COMPLETED = TOTAL_TASK = 0
+    TASK_LIST = ""
+    TODOS_URL = f'https://jsonplaceholder.typicode.com/todos?userId={USER}'
+    EMPLOYEE_URL = f'https://jsonplaceholder.typicode.com/users/{USER}'
 
-    todos_response = requests.get(todos_url, params={'userId': int(employee_id)})
-    user_response = requests.get(users_url, params={'id': int(employee_id)})
+    with urllib.request.urlopen(TODOS_URL) as response:
+        todos_data = response.read().decode()
 
-    if todos_response.status_code != 200 or user_response.status_code != 200:
-        print("Error: Failed to fetch data from the API.")
-        sys.exit(1)
+    with urllib.request.urlopen(EMPLOYEE_URL) as response:
+        employee_data = response.read().decode()
 
-    todos = todos_response.json()
-    user = user_response.json()
+    employee_info = {}
+    try:
+        employee_taks = json.loads(todos_data)
+        employee_info = json.loads(employee_data)
+    except json.JSONDecodeError:
+        print('Response could not be serialized')
 
-    if not user:
-        print("Error: Employee with ID {} not found.".format(employee_id))
-        sys.exit(1)
+    for task in employee_taks:
+        if task['completed'] is True:
+            COMPLETED += 1
+            TASK_LIST += f"\t {task['title']}\n"
+        TOTAL_TASK += 1
 
-    employee_name = user[0].get('name')
-    completed_tasks = []
-    total_tasks = len(todos)
+    employee_name = employee_info['name']
 
-    for todo in todos:
-        if todo.get('completed'):
-            completed_tasks.append(todo.get('title'))
+    t_info = f"is done with tasks({COMPLETED}/{TOTAL_TASK}):\n{TASK_LIST[:-1]}"
+    print_employee = f"Employee {employee_name} " + t_info
 
-    num_completed_tasks = len(completed_tasks)
-
-    print("Employee {} is done with tasks({}/{}):".format(employee_name, num_completed_tasks, total_tasks))
-    for task in completed_tasks:
-        print("\t{}".format(task))
-
+    print(print_employee)
